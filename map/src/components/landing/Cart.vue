@@ -6,7 +6,7 @@ import OrderServices from '@/service/OrderServices';
 
 const orderServices = new OrderServices();
 const store = useStore();
-const apiUrl = 'http://map.test/index.php/api/ecommerce/getGcashReceipt';
+const apiUrl = 'https://mindoroautoparts.online/index.php/api/ecommerce/getGcashReceipt';
 const gcashReceipt = ref(null);
 const termsAgreed = ref(false);  // To track the state of the checkbox
 const loading = ref(false)
