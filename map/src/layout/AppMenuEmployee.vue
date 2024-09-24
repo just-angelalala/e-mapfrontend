@@ -11,21 +11,21 @@ const accountType = computed(() => store.state.auth.accountType)
 import AppMenuItem from './AppMenuItem.vue';
 
 const model = ref([
-{
-    items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-chart-line', to: '/admin/dashboard' }],
-},
+// {
+//     items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-chart-line', to: '/admin/dashboard' }],
+// },
 {
     items: [{ label: 'Inventory Management', icon: 'pi pi-fw pi-truck', to: '/admin/inventory' }]
 },
 {
     items: [{ label: 'POS', icon: ' pi pi-fw pi-money-bill', to: '/admin/session' }]
 },
-{
-    items: [{ label: 'Add Account', icon: 'pi pi-fw pi-user-plus', to: '/admin/addAccount' }]
-},
-{
-    items: [{ label: 'Report', icon: 'pi pi-fw pi-user-plus', to: '/admin/reports' }]
-},
+// {
+//     items: [{ label: 'Add Account', icon: 'pi pi-fw pi-user-plus', to: '/admin/addAccount' }]
+// },
+// {
+//     items: [{ label: 'Report', icon: 'pi pi-fw pi-user-plus', to: '/admin/reports' }]
+// },
 {
     items: [{ label: 'Online Customer', icon: 'pi pi-fw pi-users', to: '/admin/onlineCustomer' }]
 }

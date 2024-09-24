@@ -299,34 +299,35 @@ const processScannedCode = async (scannedCode) => {
 };
 
 const addToOrder = async (product) => {
-  console.log(product);
-  try {
-    const orderId = orderNumber.value; // Assuming `orderNumber` is a ref holding the current order number
-    const orderDetails = {
-      order_id: orderId,
-      product_id: product.id,
-      quantity: 1, // Assuming you want to add one quantity of the product by default
-    };
+     console.log(product);
+     try {
+       const orderId = orderNumber.value;
+       const orderDetails = {
+         order_id: orderId,
+         product_id: product.id,
+         quantity: 1,
+       };
 
-    const response = await posService.updateOrder(orderId, orderDetails);
-    console.log("response", response.data);
-    toast.add({
-      severity: "success",
-      summary: "Product Added",
-      detail: `${product.name} added to the order.`,
-      life: 3000,
-    });
-    fetchOrderDetails();
-  } catch (error) {
-    console.error("Error adding product to order:", error);
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: "Failed to add product to order.",
-      life: 3000,
-    });
-  }
-};
+       const response = await posService.updateOrder(orderId, orderDetails);
+       console.log("response", response.data);
+       toast.add({
+         severity: "success",
+         summary: "Product Added",
+         detail: `${product.name} added to the order.`,
+         life: 3000,
+       });
+       await fetchOrderDetails();
+       await fetchProducts(); // Fetch updated products list
+     } catch (error) {
+       console.error("Error adding product to order:", error);
+       toast.add({
+         severity: "error",
+         summary: "Error",
+         detail: "Failed to add product to order.",
+         life: 3000,
+       });
+     }
+   };
 
 const onNodeSelect = (node) => {
   toast.add({
@@ -376,35 +377,41 @@ onBeforeUnmount(() => {
 });
 
 const updateTotalPrice = async (item) => {
-  console.log(item);
-  try {
-    const orderId = orderNumber.value; 
-    const orderDeets = item
+     console.log(item);
+     try {
+       const orderId = orderNumber.value;
+       const orderDeets = item;
 
-    const response = await posService.updateOrderDetails(orderId, orderDeets);
-    console.log("response", response.data);
-    toast.add({
-      severity: "success",
-      summary: "Quantity Updated",
-      detail: `item quantity updated`,
-      life: 3000,
-    });
-    await fetchOrderDetails();
+       const response = await posService.updateOrderDetails(orderId, orderDeets);
+       console.log("response", response.data);
+       toast.add({
+         severity: "success",
+         summary: "Quantity Updated",
+         detail: `item quantity updated`,
+         life: 3000,
+       });
+       await fetchOrderDetails();
+       await fetchProducts(); // Fetch updated products list
+     } catch (error) {
+       console.error("Error updating product in order:", error);
+       toast.add({
+         severity: "error",
+         summary: "Error",
+         detail: "Insufficient quantity",
+         life: 3000,
+       });
+     }
+   };
 
-    console.log(orderDetails.value);
-
-    // Blurring the active element to remove focus
-
-  } catch (error) {
-    console.error("Error adding product to order:", error);
-    toast.add({
-      severity: "error",
-      summary: "Error",
-      detail: "Insufficient quantity",
-      life: 3000,
-    });
-  }
-};
+   const fetchProducts = async () => {
+     try {
+       const data = await productService.getProductsPos();
+       products.value = data;
+       searchProducts(); // This will update filteredProducts based on the latest products and search/filter criteria
+     } catch (error) {
+       console.error("Error fetching products:", error);
+     }
+   };
 
 
 const deleteRow = async (item) => {
@@ -420,6 +427,7 @@ const deleteRow = async (item) => {
       life: 3000,
     });
     await fetchOrderDetails();
+    await fetchProducts(); 
 
     console.log(orderDetails.value)
   } catch (error) {
@@ -446,6 +454,7 @@ const clearAll = async () => {
       life: 3000,
     });
     await fetchOrderDetails();
+    await fetchProducts(); 
 
     console.log(orderDetails.value)
   } catch (error) {
