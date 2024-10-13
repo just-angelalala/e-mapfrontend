@@ -20,9 +20,9 @@ const posService = new POSService();
 const store = useStore();
 const printReceipt = () => {
   const receiptElement = document.getElementById("printReceipt");
-  receiptElement.style.display = "block"; // Make the receipt visible
-  window.print(); // Trigger the print dialog
-  receiptElement.style.display = "none"; // Hide the receipt after printing
+  receiptElement.style.display = "block"; 
+  window.print(); 
+  receiptElement.style.display = "none"; 
 };
 
 const router = useRouter();
@@ -30,7 +30,7 @@ const userID = computed(() => store.state.auth.userId);
 const selectedKey = ref();
 const paymentDialog = ref(false);
 const redirectToPayment = () => {
-  // Replace '/payment' with the actual route path
+  payment.value = 0;
   paymentDialog.value = true;
 };
 const productService = new ProductService();
@@ -38,13 +38,13 @@ const BASE_URL = import.meta.env.VITE_APP_BASE_URL_PHOTO;
 
 const products = ref(null);
 const searchText = ref("");
-const selectedCategories = ref([]); // To store selected categories
-const categoryOptions = ref([]); // To store options for the MultiSelect component
+const selectedCategories = ref([]); 
+const categoryOptions = ref([]); 
 
 const filteredProducts = ref([]);
-const viewMode = ref("grid"); // Default view mode
+const viewMode = ref("grid");
 const toggleView = (mode) => {
-  viewMode.value = mode; // Update the view mode
+  viewMode.value = mode; 
 };
 const customerDialog = ref(false);
 const position = ref("center");
@@ -57,10 +57,9 @@ const openPosition = (pos) => {
 const ordersDialog = ref(false);
 
 const searchProducts = () => {
-  // TODO: can search code
-  // Filter products based on search text and selected categories
+
   if (!searchText.value.trim() && selectedCategories.value.length === 0) {
-    // If both search text and categories are empty, show all products
+
     filteredProducts.value = products.value;
     console.log(filteredProducts.value)
     return;
@@ -68,14 +67,12 @@ const searchProducts = () => {
 
   let filtered = products.value;
 
-  // Filter by search text
   if (searchText.value.trim()) {
     filtered = filtered.filter((product) => {
       return product.name.toLowerCase().includes(searchText.value.trim().toLowerCase());
     });
   }
 
-  // Filter by selected categories
   if (selectedCategories.value.length > 0) {
     const selectedCategoryIds = selectedCategories.value.map((category) => category.id);
     filtered = filtered.filter((product) => {
@@ -87,15 +84,13 @@ const searchProducts = () => {
 };
 
 const filterProductsByCategory = () => {
-  console.log("Selected categories:", selectedCategories.value); // Add console log statement here for testing
+  console.log("Selected categories:", selectedCategories.value); 
   if (selectedCategories.value.length === 0) {
-    // If no categories are selected, show all products
     filteredProducts.value = products.value;
     return;
   }
-  // Extract only the ids of the selected categories
+
   const selectedCategoryIds = selectedCategories.value.map((category) => category.id);
-  // Filter products based on selected category ids
   filteredProducts.value = products.value.filter((product) => {
     return selectedCategoryIds.includes(product.category_id);
   });
@@ -125,6 +120,7 @@ const processPayment = async () => {
     try {
       const paymentDetails = {
         payment: payment.value,
+        discount: discount.value,
         change: change.value,
       };
       const response = await posService.addOrderPayment(
@@ -139,7 +135,6 @@ const processPayment = async () => {
       });
       paymentDialog.value = false;
       succesDialog.value = true;
-      // Handle further actions after successful payment
     } catch (error) {
       toast.add({
         severity: "error",
@@ -157,16 +152,15 @@ const processPayment = async () => {
     });
   }
 };
-// watch(selectedCategories, filterProductsByCategory);
+
 onMounted(async () => {
   window.addEventListener('keyup', handleKeyup);
   try {
-    // Fetch products from the backend
+
     const data = await productService.getProductsPos();
     products.value = data;
     fetchOrderDetails();
 
-    // Extract unique category names from products and populate the categoryOptions array
     const uniqueCategories = Array.from(
       new Set(data.map((product) => product.category_id))
     );
@@ -186,7 +180,7 @@ onMounted(async () => {
   sessionService
     .getSessionDetails(sessionId)
     .then((data) => {
-      nodes.value = data.data; // Update nodes with the new data
+      nodes.value = data.data; 
     })
     .catch((error) => {
       console.error("Error fetching session details:", error);
@@ -215,6 +209,8 @@ const fetchOrderDetails = async (orderId) => {
       detail: "Failed to fetch order details.",
       life: 3000,
     });
+
+
   }
 };
 
@@ -367,9 +363,11 @@ const newOrder = async () => {
     throw error;
   }
 };
+const discount = ref(0);
 const payment = ref(0);
 const change = computed(() => {
-  return payment.value - orderTotal.value;
+  const result = payment.value - (orderTotal.value - discount.value);
+  return parseFloat(result.toFixed(2));
 });
 
 onBeforeUnmount(() => {
@@ -659,6 +657,10 @@ const fetchUserInfo = async () => {
       <InputText id="username" class="flex-auto" autocomplete="off" v-model="payment" />
     </div>
     <div class="flex align-items-center gap-3 mb-5">
+      <label for="email" class="font-semibold w-6rem">Discount</label>
+      <InputText id="email" class="flex-auto" autocomplete="off" v-model="discount" />
+    </div>
+    <div class="flex align-items-center gap-3 mb-5">
       <label for="email" class="font-semibold w-6rem">Change</label>
       <InputText id="email" class="flex-auto" autocomplete="off" disabled v-model="change" />
     </div>
@@ -674,7 +676,8 @@ const fetchUserInfo = async () => {
     <span class="p-text-secondary block mb-5 text-xl font-bold">
       Tendered: {{ payment }}
     </span>
-    <span class="p-text-secondary block mb-5 text-xl font-bold">Change: {{ change }}</span>
+    <span class="p-text-secondary block mb-5 text-xl font-bold">Discount: {{ discount }}</span>
+    <span class="p-text-secondary block mb-5 text-xl font-bold">Change: {{ change.toFixed(2)}}</span>
     <div class="flex justify-content-end gap-2 w-full">
       <Button class="w-full" label="New Order" @click="newOrder" severity="success" />
       <Button class="w-full" label="Print" @click="printReceipt" severity="primary" />
@@ -708,10 +711,10 @@ const fetchUserInfo = async () => {
       </li>
     </ul>
     <p style="border-top: 1px dashed;"><strong>Order Number:</strong> {{ orderNumber }} <br>
-
       <strong>Total Amount:</strong> {{ orderTotal | currency }} <br>
       <strong>Tendered:</strong> {{ payment | currency }} <br>
-      <strong>Change:</strong> {{ change | currency }}
+      <strong>Discount:</strong> {{ discount | currency }} <br>
+      <strong>Change:</strong> {{ change.toFixed(2) }}
     </p>
     <div>
 

@@ -2,6 +2,13 @@ import axios from "@/api/axios";
 
 export default class ProductService {
 
+  getCategoriesForTabs() {
+    return axios
+        .get("/ecommerce/getCategoriesForTabs")
+        .then((res) => res.data)
+        .then((d) => d.data);
+}
+
   getProducts() {
     return axios
       .get("/inventory/getAllProductsUngrouped")
@@ -87,12 +94,11 @@ export default class ProductService {
 
   downloadReport(format) {
     return axios.get(`/inventory/exportProductsUsingTemplate/${format}`, {
-        responseType: 'blob' // Ensures that the response is handled as a Blob
+        responseType: 'blob'
     }).then(response => {
         const contentType = response.headers['content-type'];
         
-        // Decide the type of the file based on the contentType
-        let blobType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'; // Default to Excel
+        let blobType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'; 
         let defaultFileName = 'download.xlsx';
         if (contentType && contentType.includes('application/pdf')) {
             blobType = 'application/pdf';
@@ -101,7 +107,7 @@ export default class ProductService {
         
         const url = window.URL.createObjectURL(new Blob([response.data], { type: blobType }));
         const contentDisposition = response.headers['content-disposition'];
-        let fileName = defaultFileName; // Fallback file name
+        let fileName = defaultFileName; 
         if (contentDisposition) {
             const fileNameMatch = contentDisposition.match(/filename="?(.+)"?/);
             if (fileNameMatch && fileNameMatch[1]) {
@@ -109,7 +115,6 @@ export default class ProductService {
             }
         }
 
-        // Create a link and trigger the download
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', fileName);
@@ -121,8 +126,5 @@ export default class ProductService {
         throw err;
     });
 }
-
-
-
 
 }

@@ -18,11 +18,21 @@ const visible = ref(false);
 const selectedProducts = ref([]);
 const categoryFilter = ref('All');
 const searchQuery = ref("");
-const activeTab = ref({ title: 'All', filter: 'All' });
+const activeTab = ref('All');
 
-onMounted(() => {
-    updateProducts(activeTab.value.filter);
+onMounted( async () => {
+    await loadCategories();
+    updateProducts(activeTab.value);
 });
+
+async function loadCategories() {
+    try {
+        const categoryData = await productService.getCategoriesForTabs();
+        tabs.value = categoryData;
+    } catch (error) {
+        console.error("Failed to load categories for tabs:", error);
+    }
+}
 
 async function updateProducts(categoryName) {
     loading.value = true;  // Set loading to true when the operation begins
@@ -104,6 +114,10 @@ watch(() => store.state.cart, () => {
     updateSelectedProducts();
 }, { deep: true });
 
+watch(activeTab, (newCategory) => {
+    updateProducts(newCategory);
+});
+
 const updateSelectedProducts = () => {
     const cartProductIds = store.state.cart.map(item => item.id);
     selectedProducts.value = products.value.filter(p => cartProductIds.includes(p.id));
@@ -130,29 +144,14 @@ const filteredProducts = computed(() => {
         product.name.toLowerCase().includes(searchQuery.value.toLowerCase())
     );
 });
+
 const tabs = ref([
-    { title: 'All', filter: 'All' },
-    { title: 'Replacement Parts', filter: 'Replacement Parts' },
-    { title: 'Tires and Wheels', filter: 'Tires and Wheels' },
-    { title: 'Maintenance Supplies', filter: 'Maintenance Supplies' },
-    { title: 'Lighting', filter: 'Lighting' },
-    { title: 'Adhesives and Sealants', filter: 'Adhesives and Sealants' },
-    { title: 'Parts and Accessories', filter: 'Parts and Accessories' },
-    { title: 'Electrical Components', filter: 'Electrical Components' },
-    { title: 'Tools and Equipment', filter: 'Tools and Equipment' },
-    { title: 'Car Care Products', filter: 'Car Care Products' }
 ]);
 
 
-const handleTabChange = (event) => {
-    activeTab.value = tabs.value[event.index];
-    updateProducts(activeTab.value.filter);
-};
 
 </script>
 <template>
-    <TabView :scrollable="true" @tab-change="handleTabChange">
-        <TabPanel v-for="tab in tabs" :key="tab.title" :header="tab.title">
             <div v-if="loading">
                 <Skeleton width="full" height="20rem" />
             </div>
@@ -188,11 +187,12 @@ const handleTabChange = (event) => {
                 <div class="flex justify-content-between">
                     <h2>All Products</h2>
                     <div>
+						<Dropdown v-model="activeTab" :options="tabs" optionLabel="title" optionValue="filter" placeholder="Select a Categort" class="w-full md:w-56" />
                         <InputText v-model="searchQuery" placeholder="Search products..." />
                     </div>
                 </div>
                 <div class="card position-relative">
-                    <Carousel :value="filteredProducts" :numVisible="4" :numScroll="1" :responsiveOptions="responsiveOptions">
+                    <Carousel :value="filteredProducts" :numVisible="6" :numScroll="6" :responsiveOptions="responsiveOptions" :showIndicators="false">
                         <template #item="slotProps">
                             <div class="border-1 surface-border border-round m-2 p-3">
                                 <div class="mb-3">
@@ -216,8 +216,6 @@ const handleTabChange = (event) => {
                     </Carousel>
                 </div>
             </div>
-        </TabPanel>
-    </TabView>
     <Footer/>
     </template>
 
@@ -230,4 +228,4 @@ const handleTabChange = (event) => {
     position: relative;
 }
 </style>
-    
+

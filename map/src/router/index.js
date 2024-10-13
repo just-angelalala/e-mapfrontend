@@ -39,6 +39,7 @@ const router = createRouter({
     },
     {
       path: "/admin",
+      meta: { requiresAuth: true, roles: ['Owner', 'Employee'] },
       component: AppLayout,
       children: [
         {
@@ -52,7 +53,7 @@ const router = createRouter({
           component: () => import("@/views/pages/admin/ManageInventory.vue"),
         },
         {
-          path: "pos/:sessionId", // Add the parameter placeholder
+          path: "pos/:sessionId",
           name: "POS",
           component: () => import("@/views/pages/admin/POS.vue"),
         },
@@ -120,29 +121,26 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const store = useStore();
   await store.dispatch('auth/initializeAuth');
-  const userRole = store.state.auth.accountType; // Assuming 'accountType' holds the role
-  const isAuthenticated = store.state.auth.isAuthenticated;
+  const userRole = store.state.auth.accountType;
 
-  if (isAuthenticated && (userRole === 'Owner' || userRole === 'Employee')) {
-    // If the user is either an owner or an employee, redirect to the admin dashboard
-    if (to.path !== '/admin/dashboard') {
-      next({ path: '/admin/dashboard' });
-    } else {
-      next();
-    }
-  } else if (to.matched.some(record => record.meta.requiresAuth)) {
-    if (!isAuthenticated) {
+  console.log(userRole); 
+
+  if (to.name === 'landing' && (userRole === 'Owner' || userRole === 'Employee')) {
+    next({ name: 'dashboard' });
+    return;
+  }
+
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    if (!userRole) {
       next({ name: 'login', query: { redirect: to.fullPath } });
-    } else if (to.matched.some(record => record.meta.allowedRoles && !record.meta.allowedRoles.includes(userRole))) {
-      next({ name: 'login' }); // Redirect to login if role not allowed
+    } else if (to.matched.some(record => record.meta.roles && !record.meta.roles.includes(userRole))) {
+      next({ name: 'login' });
     } else {
       next();
     }
   } else {
-    next(); // Continue as normal if no role-related redirects are necessary
+    next();
   }
 });
-
-
 
 export default router;

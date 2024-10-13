@@ -37,8 +37,9 @@ onMounted(() => {
 
 const { layoutConfig } = useLayout();
 const logoUrl = computed(() => {
-    return `layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
+    return '/layout/images/logo-emap.jpg'
 });
+
 
 </script>
 
@@ -92,7 +93,7 @@ const logoUrl = computed(() => {
                         class="flex flex-wrap align-items-center justify-content-center md:justify-content-start md:mb-0 mb-3 cursor-pointer">
 
                         <h5>FACEBOOK PAGE</h5>
-                        <a href="https://www.facebook.com/pages/Mindoro-Auto-Parts/217973898339203"
+                        <a href="https://www.facebook.com/profile.php?id=61566579271268"
                             target="_blank">Visit
                             Mindoro Auto Parts on Facebook</a>
                     </a>

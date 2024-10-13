@@ -3,6 +3,8 @@ import { ref, computed, watch } from "vue";
 import { useStore } from 'vuex';
 import { useToast } from "primevue/usetoast";
 import OrderServices from '@/service/OrderServices';
+import { useRouter } from 'vue-router';
+
 
 const orderServices = new OrderServices();
 const store = useStore();
@@ -10,6 +12,8 @@ const apiUrl = 'https://mindoroautoparts.online/index.php/api/ecommerce/getGcash
 const gcashReceipt = ref(null);
 const termsAgreed = ref(false);  // To track the state of the checkbox
 const loading = ref(false)
+const router = useRouter();
+const userId = computed(() => store.state.auth.userId);
 
 const visible = computed({
     get: () => store.state.cartVisible,
@@ -36,9 +40,16 @@ const isValidPhoneNumber = computed(() => {
 
 const checkout = async () => {
     const subtotal = formattedCartItems.value.reduce((sum, item) => sum + item.totalPrice, 0);
+    console.log(userId.value);
+    // Use the computed userId here
+    if (!userId.value || userId.value === 0) {
+        // Redirect to login if user is not logged in
+        router.push({ name: 'login' }); // Use router.push for redirection
+        return;
+    }
 
     const orderData = {
-        user_id: store.state.auth.userId,
+        user_id: userId.value, // Access the computed userId
         details: formattedCartItems.value.map(item => ({
             product_id: item.id,
             quantity: item.quantity,
@@ -132,13 +143,20 @@ watch(cartItems, (newCartItems) => {
         </Splitter>
 
         <!-- Upload receipt -->
-        <h6 for="gcashReceipt">Upload your Gcash receipt</h6>
-        <div class="card flex justify-content-center mt-2">
-            <FileUpload name="gcashReceipt[]" :url="apiUrl" @upload="onAdvancedUpload($event)" multiple accept="image/*" :maxFileSize="1000000">
-                <template #empty>
-                    <p>Drag and drop files here to upload.</p>
-                </template>
-            </FileUpload>
+        <h6 for="gcashReceipt">Upload your Payment receipt</h6>
+        <div class="card flex justify-content-between mt-2">
+            <div class="payment-details p-3" style="min-width: 250px;">
+                <p><strong>JEFFREY C. CHENG</strong> </p>
+                <p><strong>BPI BANK:</strong> 8963-0770-34</p>
+                <p><strong>GCASH:</strong> 09190043801</p>
+            </div>
+            <div class="fileupload w-full" >
+                <FileUpload name="gcashReceipt[]" :url="apiUrl" @upload="onAdvancedUpload($event)" multiple accept="image/*" :maxFileSize="1000000">
+                    <template #empty>
+                        <p>Drag and drop files here to upload.</p>
+                    </template>
+                </FileUpload>
+            </div>
         </div>
 
         <div class="p-card mt-3">

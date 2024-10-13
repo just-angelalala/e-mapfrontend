@@ -165,7 +165,6 @@ const actions = {
                 commit("SET_TOKEN", token);
                 commit("SET_USER_ID", decodedToken.user_id);
             } catch (error) {
-                // Log the error if token decoding fails
                 console.error("Error decoding the token:", error);
                 // Optionally handle the invalid token case, e.g., by clearing stored data or redirecting to login
             }

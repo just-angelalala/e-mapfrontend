@@ -11,7 +11,7 @@ import { jwtDecode } from 'jwt-decode';
 const { layoutConfig } = useLayout();
 
 const logoUrl = computed(() => {
-    return `layout/images/${layoutConfig.darkTheme.value ? 'logo-white' : 'logo-dark'}.svg`;
+    return '/layout/images/logo-emap.jpg'
 });
 
 const auth = getAuth(firebaseApp);
@@ -58,8 +58,9 @@ async function loginUser() {
 
         console.error('Login failed:', error);
         // Handle login failure (e.g., show an error message)
-    }
+    }  
 }
+
 </script>
 
 <template>
@@ -69,9 +70,12 @@ async function loginUser() {
             <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
                 <div class="w-full surface-card py-8 px-5 sm:px-8" style="border-radius: 53px">
                     <div class="text-center mb-5">
-                        <img src="/demo/images/login/avatar.png" alt="Image" height="50" class="mb-3" />
                         <div class="text-900 text-3xl font-medium mb-3">Welcome, User</div>
-                        <span class="text-600 font-medium">Sign in to continue</span>
+
+                        <span>Don't have an account?</span>
+                        <router-link :to="{ name: 'register' }" class="ml-2 text-primary font-bold">
+                            Signup
+                        </router-link>
                     </div>
 
                     <div>
