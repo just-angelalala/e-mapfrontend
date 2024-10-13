@@ -80,6 +80,13 @@ export default class ProductService {
       .then((d) => d.data);
   }
 
+  getTotalDiscount() {
+    return axios
+      .get("/dashboard/getTotalDiscount")
+      .then((res) => res.data)
+      .then((d) => d.data);
+  }
+
   deleteProductsByIds(productIds) {
       return axios
         .delete("/inventory/deleteProduct", { data: { productIds } })

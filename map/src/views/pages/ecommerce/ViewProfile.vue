@@ -70,7 +70,6 @@ onMounted(() => {
     <Card style="width: 80rem; overflow: hidden">
         <template #header>
             <!-- Default image if userProfile.user_image is null or undefined -->
-            <img :alt="`${userProfile.first_name} ${userProfile.last_name}`" :src="userProfile.user_image || 'https://primefaces.org/cdn/primevue/images/usercard.png'" />
         </template>
         <template #title>Personal Information</template>
         <template #content>

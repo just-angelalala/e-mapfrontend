@@ -5,6 +5,12 @@ const { layoutConfig } = useLayout();
 const logoUrl = computed(() => {
     return '/layout/images/logo-emap.jpg'
 });
+
+import { useStore } from "vuex";
+
+const store = useStore();
+
+const accountType = computed(() => store.state.auth.accountType)
 </script>
 
 <template>
@@ -33,7 +39,7 @@ const logoUrl = computed(() => {
                                 <span>Home</span>
                             </router-link>
                         </li>
-                        <li>
+                        <li v-if="accountType == 'Customer'" >
                             <router-link to="/orderTracker" @click="smoothScroll('#hero')"
                                 class="flex m-0 md:ml-5 px-0 py-3 text-900 font-medium line-height-3 p-ripple" v-ripple>
                                 <span>Order Tracker</span>

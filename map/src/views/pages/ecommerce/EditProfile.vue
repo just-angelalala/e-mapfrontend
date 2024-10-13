@@ -112,7 +112,6 @@ async function cancel()
     <h3>Edit User Profile</h3>
     <Card style="width: 80rem; overflow: hidden">
         <template #header>
-            <img alt="user header" src="https://primefaces.org/cdn/primevue/images/usercard.png" />
         </template>
         <template #title>Personal Information</template>
         <template #content >

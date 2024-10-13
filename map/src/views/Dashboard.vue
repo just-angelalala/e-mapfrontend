@@ -170,8 +170,8 @@ watch(basis, () => {
 }, { immediate: true });  // Fetch immediately on basis change
 
 
-
-onMounted(() => {
+const discount = ref(0)
+onMounted( async () => {
     fetchTopProducts();  
     getMonthlySalesData();
     productService.getProductsSmall().then((data) => (products.value = data));
@@ -181,6 +181,8 @@ onMounted(() => {
         barChartData.value.labels = newVal.map(item => item.city);
         barChartData.value.datasets[0].data = newVal.map(item => item.count);
     }, { deep: true });
+    await productService.getTotalDiscount().then((data) => (discount.value = data))
+    console.log(discount.value);
 });
 
 const formatCurrency = (value) => {
@@ -315,7 +317,7 @@ const toggleMenu = () => {
                 <div class="flex justify-content-between mb-3">
                     <div>
                         <span class="block text-500 font-medium mb-3">Average Sales Per Day</span>
-                        <div class="text-900 font-medium text-xl">{{ orderCount.averageSalesPerDay ? parseInt(orderCount.averageSalesPerDay) : 0 }}</div>
+                        <div class="text-900 font-medium text-xl">{{ orderCount.averageSalesPerDay ? '₱' + parseInt(orderCount.averageSalesPerDay) : 0 }}</div>
                     </div>
                     <div class="flex align-items-center justify-content-center bg-cyan-100 border-round"
                         style="width: 2.5rem; height: 2.5rem">
@@ -327,21 +329,26 @@ const toggleMenu = () => {
             </div>
         </div>
         <div class="col-12 lg:col-6 xl:col-3">
-            <div class="card mb-0">
-                <div class="flex justify-content-between mb-3">
-                    <div>
-                        <span class="block text-500 font-medium mb-3">Discounts Applied</span>
-                        <div class="text-900 font-medium text-xl">{{ orderCount.averageSalesPerDay ? parseInt(orderCount.averageSalesPerDay) : 0 }}</div>
-                    </div>
-                    <div class="flex align-items-center justify-content-center bg-cyan-100 border-round"
-                        style="width: 2.5rem; height: 2.5rem">
-                        <i class="pi pi-inbox text-cyan-500 text-xl"></i>
-                    </div>
+    <div class="card mb-0">
+        <div class="flex justify-content-between mb-3">
+            <div>
+                <span class="block text-500 font-medium mb-3">Discounts Applied</span>
+                <div class="text-900 font-medium text-xl">
+                    {{ discount.total_discount ? '₱' + parseFloat(discount.total_discount).toFixed(2) : '₱0.00' }}
                 </div>
-                <span class="text-green-500 font-medium">{{ orderCount.newAccountsThisMonth ? orderCount.newAccountsThisMonth : 0 }} </span>
-                <span class="text-500"> Daily Deals & Discounts</span>
+            </div>
+            <div class="flex align-items-center justify-content-center bg-cyan-100 border-round"
+                style="width: 2.5rem; height: 2.5rem">
+                <i class="pi pi-inbox text-cyan-500 text-xl"></i>
             </div>
         </div>
+        <span class="text-green-500 font-medium">
+            {{ discount.today_discount ? '₱' + parseFloat(discount.today_discount).toFixed(2) : '₱0.00' }}
+        </span>
+        <span class="text-500"> Daily Deals & Discounts</span>
+    </div>
+</div>
+
 
 
         <div class="col-12 xl:col-6">
