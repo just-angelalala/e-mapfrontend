@@ -87,6 +87,13 @@ export default class ProductService {
       .then((d) => d.data);
   }
 
+  fetchProductDetailsForSalesReport() {
+    return axios
+      .get("/ecommerce/fetchProductDetailsForSalesReport")
+      .then((res) => res.data)
+      .then((d) => d.data);
+  }
+
   deleteProductsByIds(productIds) {
       return axios
         .delete("/inventory/deleteProduct", { data: { productIds } })

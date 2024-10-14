@@ -24,7 +24,7 @@ const model = ref([
     items: [{ label: 'Add Account', icon: 'pi pi-fw pi-user-plus', to: '/admin/addAccount' }]
 },
 {
-    items: [{ label: 'Report', icon: 'pi pi-fw pi-user-plus', to: '/admin/reports' }]
+    items: [{ label: 'Sales Report', icon: 'pi pi-fw pi-user-plus', to: '/admin/reports' }]
 },
 {
     items: [{ label: 'Online Customer', icon: 'pi pi-fw pi-users', to: '/admin/onlineCustomer' }]
