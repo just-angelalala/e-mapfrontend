@@ -17,10 +17,21 @@ const userID = computed(() => store.state.auth.userId);
 const accountType = computed(() => store.state.auth.accountType);
 const token = computed(() => store.state.auth.token);
 
-onMounted(() => {
+import OrderServices from '@/service/OrderServices';
+
+const orderServices = new OrderServices();
+
+const orders = ref([])
+
+onMounted( async () => {
     bindOutsideClickListener();
     fetchUserInfo()
+    await store.dispatch('products/fetchLowStockProducts');
+    const response = await orderServices.getOrdersWithDetails();
+    orders.value = response.data;
+
 });
+
 
 onBeforeUnmount(() => {
     unbindOutsideClickListener();
@@ -116,6 +127,49 @@ const viewProfile = () => {
     router.push({ name: 'View Profile' });
 };
 
+const isVisible = ref(false)
+
+const lowStockProducts = computed(() => store.state.products.lowStockProducts);
+
+const lowStockMessages = computed(() =>
+  lowStockProducts.value
+    .filter(product => Number(product.quantity) < Number(product.ideal_count))
+    .map(product => ({
+      type: 'lowStock',
+      message: `${product.name} stock is running low.`,
+      details: `Available: ${product.quantity} ${product.unit_of_measurement} (Ideal: ${product.ideal_count})`,
+    }))
+);
+
+// Computed: Pending Orders Notifications
+const pendingOrderMessages = computed(() =>
+  orders.value
+    .filter(order => order.status === 'Pending')
+    .map(order => ({
+      type: 'pendingOrder',
+      message: `Order #${order.order_id} is pending.`,
+      details: `Customer: ${order.customer.first_name} ${order.customer.last_name}\nOrder Date: ${new Date(order.order_date).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })}`,
+    }))
+);
+
+
+
+// Combine Notifications
+const combinedNotifications = computed(() => [
+  ...lowStockMessages.value,
+  ...pendingOrderMessages.value,
+]);
+
+const openNotification = () => {
+    isVisible.value = true
+
+    console.log(lowStockProducts.value);
+}
+
 </script>
 
 <template>
@@ -134,9 +188,12 @@ const viewProfile = () => {
         </button>
 
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <button @click="onTopBarMenuButton()" class="p-link layout-topbar-button">
-                <i class="pi pi-calendar"></i>
-                <span>Calendar</span>
+            <button @click="openNotification()" class="p-link layout-topbar-button">
+                <i class="pi pi-bell"></i>
+                <span>Notifications</span>
+                <span v-if="combinedNotifications.length" class="badge">
+                {{ combinedNotifications.length }}
+                </span>
             </button>
             <Avatar 
                 :image="`${BASE_URL}${userInfo.photo}` || 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png'"
@@ -169,6 +226,165 @@ const viewProfile = () => {
         </Menu>
         </div>
     </div>
+
+    <Dialog v-model:visible="isVisible" maximizable header="Notifications" :style="{ width: '30rem' }" :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" position="topright" :modal="false" :draggable="false">
+        <div v-if="combinedNotifications.length" class="notification-container">
+      <div
+        v-for="(notification, index) in combinedNotifications"
+        :key="index"
+        class="notification-item"
+      >
+        <i
+          :class="notification.type === 'lowStock' ? 'pi pi-exclamation-circle' : 'pi pi-clock'"
+          class="notification-icon"
+        ></i>
+        <div class="notification-text">
+          <strong>{{ notification.message }}</strong>
+          <p class="notification-details">{{ notification.details }}</p>
+        </div>
+      </div>
+    </div>
+    <!-- No Notifications (Empty State) -->
+    <div v-else class="notification-empty">
+      <i class="pi pi-check-circle notification-empty-icon"></i>
+      <p>No notifications at the moment.</p>
+    </div>
+
+    </Dialog>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+/* Notification Container */
+.notification-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Individual Notification */
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.notification-icon {
+  font-size: 1.5rem;
+  color: #f39c12; /* Warning Color */
+  margin-right: 1rem;
+}
+
+.notification-text {
+  flex-grow: 1;
+}
+
+.notification-details {
+  color: #666;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* Empty State */
+.notification-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: center;
+  color: #6c757d;
+}
+
+.notification-empty-icon {
+  font-size: 2rem;
+  color: #28a745; /* Success Color */
+}
+
+/* Button Styling */
+.btn-primary {
+  padding: 0.5rem 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.layout-topbar-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.5rem;
+}
+
+.layout-topbar-button i {
+  font-size: 1.5rem;
+}
+
+.layout-topbar-button .badge {
+  position: absolute;
+  top: 4px; /* Adjust closer to the bell icon */
+  right: 4px; /* Adjust closer horizontally */
+  background-color: #f39c12; /* Warning Color */
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 1.25rem; /* Slightly smaller badge */
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+.layout-topbar-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: #333;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.5rem;
+}
+
+.layout-topbar-button i {
+  font-size: 1.5rem;
+}
+
+.layout-topbar-button .badge {
+  position: absolute;
+  top: 2px; /* Adjust closer to the bell icon */
+  right: 2px; /* Adjust closer horizontally */
+  background-color: #f39c12; /* Warning Color */
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: bold;
+  border-radius: 50%;
+  width: 1.25rem; /* Slightly smaller badge */
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+
+
+
+</style>
