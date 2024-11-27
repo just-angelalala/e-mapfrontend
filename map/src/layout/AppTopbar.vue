@@ -196,11 +196,14 @@ const openNotification = () => {
                 </span>
             </button>
             <Avatar 
-                :image="`${BASE_URL}${userInfo.photo}` || 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png'"
-                class="mr-2 ml-5 cursor-pointer" 
-                shape="circle" 
-                @click="toggle" aria-haspopup="true" aria-controls="overlay_menu" size="large"
-            />
+        :image="userInfo.photo ? `${BASE_URL}${userInfo.photo}` : 'https://img.icons8.com/?size=100&id=13042&format=png&color=000000'" 
+        class="mr-2 ml-5 cursor-pointer" 
+        shape="circle" 
+        @click="toggle" 
+        aria-haspopup="true" 
+        aria-controls="overlay_menu" 
+        size="large"
+    />
             <Menu ref="menu" :model="items" class="w-full md:w-15rem" :popup="true">
                 <template #start>
                 <span class="inline-flex align-items-center gap-1 px-2 py-2">
