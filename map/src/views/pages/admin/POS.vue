@@ -147,7 +147,7 @@ const processPayment = async () => {
     toast.add({
       severity: "error",
       summary: "Payment Error",
-      detail: "Invalid payment details.",
+      detail: "Payment amount is insufficient. Please provide the required amount to complete the transaction.",
       life: 3000,
     });
   }
@@ -196,10 +196,17 @@ const fetchOrderDetails = async (orderId) => {
     const response = await posService.getOrderDetails(orderId);
     orderDetails.value = response.data.details; // Assuming response is the array of order details
     console.log("Order Details:", orderDetails.value);
+
     if (orderDetails.value.length === 0) {
-      orderTotal.value = 0;
+      orderTotal.value = formatToTwoDecimal(0);
     } else {
-      orderTotal.value = response.data.total_price || 0;
+      // Calculate total price from orderDetails array
+      const total = orderDetails.value.reduce((sum, item) => {
+        return sum + parseFloat(item.total_price || 0);
+      }, 0);
+
+      // Format total to two decimal places
+      orderTotal.value = formatToTwoDecimal(total);
     }
   } catch (error) {
     console.error("Error fetching order details:", error);
@@ -209,9 +216,12 @@ const fetchOrderDetails = async (orderId) => {
       detail: "Failed to fetch order details.",
       life: 3000,
     });
-
-
   }
+};
+
+// Helper function to format to two decimal places
+const formatToTwoDecimal = (amount) => {
+  return amount.toFixed(2); // Always returns a string with 2 decimal places
 };
 
 // Example usage: Call this function when needed, e.g., when a user selects an order to view details
@@ -356,6 +366,8 @@ const newOrder = async () => {
     // Optionally, you can also log the updated orderNumber for verification
     console.log("Updated orderNumber:", orderNumber.value);
     fetchOrderDetails();
+
+    payment.value = 0
   
     succesDialog.value = false;
   } catch (error) {
@@ -390,6 +402,7 @@ const updateTotalPrice = async (item) => {
        });
        await fetchOrderDetails();
        await fetchProducts(); // Fetch updated products list
+       console.log(orderTotal.value);
      } catch (error) {
        console.error("Error updating product in order:", error);
        toast.add({
@@ -535,7 +548,7 @@ const fetchUserInfo = async () => {
           <div class="flex w-full justify-content-between text-2xl">
             <div class="font-bold w-full">Total</div>
             <div>
-              {{ orderTotal }}
+          {{"₱" +  orderTotal }}
             </div>
           </div>
           <br />

@@ -57,6 +57,8 @@ export default class POSService {
         orderDetails
       );
 
+      console.log(response);
+
       if (response.status === 200) {
         return response.data;
       } else {
