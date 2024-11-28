@@ -144,7 +144,7 @@ const lowStockMessages = computed(() =>
 // Computed: Pending Orders Notifications
 const pendingOrderMessages = computed(() =>
   orders.value
-    .filter(order => order.status === 'Pending')
+    .filter(order => order.status === 'pending_approval')
     .map(order => ({
       type: 'pendingOrder',
       message: `Order #${order.order_id} is pending.`,
