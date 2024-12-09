@@ -13,13 +13,13 @@ const fetchFeedbacks = async () => {
         const response = await orderService.getFeedbacks();
         console.log(response.data);
         
-        // Update the mapping to include a default fallback for the rating
+       
         feedbacks.value = response.data.map(feedback => ({
             first_name: feedback.first_name ?? 'N/A',
             last_name: feedback.last_name ?? 'N/A',
             feedback: feedback.feedback ?? 'No feedback provided',
-            rating: parseInt(feedback.rating) ?? 0, // Default to 0 if rating is not parseable
-            avatar: 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png', // Default avatar
+            rating: parseInt(feedback.rating) ?? 0, 
+            avatar: 'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png',
             feedback_photo: feedback.feedback_photo ?? null
         }));
 
@@ -77,27 +77,9 @@ const logoUrl = computed(() => {
         </Carousel>
     </div>
     <div>
-        <!-- footer starts here-->
         <div class="py-4 px-4 mx-0 lg:mx-8">
             <div class="grid justify-content-between">
-                <div class="col-12 md:col-2">
-
-
-                    <a @click="smoothScroll('#home')"
-                        class="flex flex-wrap align-items-center justify-content-center md:justify-content-start md:mb-0 mb-3 cursor-pointer">
-                        <img :src="logoUrl" alt="Sakai Logo" width="50" height="50" class="mr-2" />
-                        <h4 class="font-medium text-3xl text-900">MINDORO AUTO PARTS</h4>
-                    </a>
-
-                    <a @click="smoothScroll('#home')"
-                        class="flex flex-wrap align-items-center justify-content-center md:justify-content-start md:mb-0 mb-3 cursor-pointer">
-
-                        <h5>FACEBOOK PAGE</h5>
-                        <a href="https://www.facebook.com/profile.php?id=61566579271268"
-                            target="_blank">Visit
-                            Mindoro Auto Parts on Facebook</a>
-                    </a>
-                </div>
+                
 
                 <div class="col-12 md:col-10 lg:col-7">
                     <div class="flex justify-content-end flex-wrap">
@@ -107,8 +89,27 @@ const logoUrl = computed(() => {
                             referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
+
+                <div class="col-12 md:col-2">
+
+                    <a @click="smoothScroll('#home')" 
+                        class="flex flex-wrap align-items-center justify-content-center md:justify-content-start md:mb-0 mb-3 cursor-pointer">
+                        
+                        <h5 class="text-xl font-semibold text-gray-800 mb-4">For more inquiries, feel free to message us on Facebook!</h5>
+
+                        <a href="https://www.facebook.com/messages/t/456009860924002" target="_blank" 
+                            class="flex items-center gap-3 text-blue-600 hover:text-blue-800">
+                            
+                            <img src="https://img.icons8.com/?size=100&id=ZdtiMuVlxCyi&format=png&color=000000" 
+                                alt="Facebook Messenger" 
+                                style="width: 50px; height: 50px; border-radius: 50%; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);" />
+
+                            <span class="text-lg font-medium">Chat with us on Facebook</span>
+                        </a>
+                    </a>
+
+                </div>
             </div>
-            <!-- footer ends here-->
         </div>
     </div>
 </template>

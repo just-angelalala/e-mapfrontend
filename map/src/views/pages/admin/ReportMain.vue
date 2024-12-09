@@ -118,6 +118,7 @@ const generateReport = async () => {
             <Button @click="clearFilter" severity="danger" icon="pi pi-filter-slash" label="Clear Filter" outlined></Button>
         </div>
         <div class="">
+            <Button label="Print" icon="pi pi-print " class="p-button-success ml-4" @click="printPage" />
             <Button label="Export" icon="pi pi-download " class="p-button-help ml-4" @click="generateReport" />
         </div>
     </div>

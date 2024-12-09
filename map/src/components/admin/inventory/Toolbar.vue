@@ -262,6 +262,7 @@ watch(lowStockProducts, (newVal, oldVal) => {
                 <Dropdown :options="dropdownOptions" v-model="selectedOption" optionLabel="name"
                     placeholder="Select Status" @change="onDropdownChange" />
             </div>
+            
         </template>
 
         <template v-slot:end>
