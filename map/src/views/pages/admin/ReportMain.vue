@@ -107,6 +107,10 @@ const generateReport = async () => {
     }
 };
 
+const printPage = () => {
+    window.print();
+}
+
 
 </script>
 
