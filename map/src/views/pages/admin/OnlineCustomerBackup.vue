@@ -4,50 +4,31 @@ import OrderServices from '@/service/OrderServices';
 import PrimeVue from 'primevue/config';
 import { useToast } from 'primevue/usetoast';
 
-const orderServices = new OrderServices();
-
 const toast = useToast();
 const visible = ref(false);
 const actionVisible = ref(false);
 const customerInfoVisible = ref(false);
-const editingOrder = ref({});
-const pickedUpOrders = ref([])
-const notPickedUpOrders = ref([])
+const editingOrder = ref({});  // Initialized to an empty object for safe property access
+const orders = ref([]);
 const feedbackVisible = ref(false);
+
+const orderServices = new OrderServices();
+
 
 const BASE_URL = import.meta.env.VITE_APP_BASE_URL_RECEIPT;
 
-// Reactive variables
-const fetchedOrders = ref([]);
-const showPickedUp = ref(true); // Toggle state
-
-// Computed property for dynamically filtered orders
-const orders = computed(() => {
-  return showPickedUp.value
-    ? fetchedOrders.value.filter(order => order.status !== "Not Picked Up")
-    : fetchedOrders.value.filter(order => order.status === "Not Picked Up");
-});
-
-// Fetch orders and update data
 const fetchOrders = async () => {
   try {
-    // Update order statuses as needed
     await orderServices.updateOrderStatusIfNotPickedUp();
-
-    // Fetch orders with details
     const response = await orderServices.getOrdersWithDetails();
-    fetchedOrders.value = response.data; // Store all orders
+    orders.value = response.data;
   } catch (error) {
-    console.error("Failed to fetch orders:", error);
-    toast.error("Failed to fetch orders.");
+    console.error('Failed to fetch orders:', error);
+    toast.error('Failed to fetch orders.');
   }
 };
 
-// Toggle between picked-up and not picked-up views
-const togglePickedUpView = () => {
-  showPickedUp.value = !showPickedUp.value;
-};
-
+onMounted(fetchOrders);
 
 const viewOrderDetails = (order) => {
   if (order) {
@@ -121,18 +102,29 @@ const markOrderAsFinished = async () => {
   }
 };
 
+const formattedStatus = computed(() => {
+  if (editingOrder.value.status === 'pending_approval') {
+    return 'Pending';
+  }
+  return editingOrder.value.status || 'No status available';
+});
+
+const statusColor = computed(() => {
+  if (editingOrder.value.status === 'pending_approval') {
+    return 'red';
+  }
+  return 'black';
+});
+
 const viewFeedback = (order) => {
   editingOrder.value = order;
   console.log(editingOrder.value);
   feedbackVisible.value = true;
 };
-
-onMounted(fetchOrders);
 </script>
 
 <template>
   <div class="card">
-    <Button class="mb-2" :label="showPickedUp ? 'Show Not Picked Up' : 'Show Picked Up'" @click="togglePickedUpView" />
     <DataTable :value="orders">
       <Column field="order_id" header="Order ID"></Column>
       <Column field="customer" header="Customer">

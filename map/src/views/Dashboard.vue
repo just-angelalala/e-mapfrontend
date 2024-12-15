@@ -169,9 +169,33 @@ watch(basis, () => {
     fetchTopProducts();
 }, { immediate: true });  // Fetch immediately on basis change
 
+import OrderServices from '@/service/OrderServices';
+
+const orderServices = new OrderServices();
+
+const fetchedOrders = ref([]);
+
+const notPickedUpCount = computed(() => {
+  return fetchedOrders.value.filter(order => order.status === "Not Picked Up").length;
+});
+
+const fetchOrders = async () => {
+  try {
+    // Update order statuses as needed
+    await orderServices.updateOrderStatusIfNotPickedUp();
+
+    // Fetch orders with details
+    const response = await orderServices.getOrdersWithDetails();
+    fetchedOrders.value = response.data; // Store all orders
+  } catch (error) {
+    console.error("Failed to fetch orders:", error);
+    toast.error("Failed to fetch orders.");
+  }
+};
 
 const discount = ref(0)
 onMounted( async () => {
+    fetchOrders()
     fetchTopProducts();  
     getMonthlySalesData();
     productService.getProductsSmall().then((data) => (products.value = data));
@@ -335,7 +359,7 @@ const toggleMenu = () => {
                     <div>
                         <span class="block text-500 font-medium mb-3">Unclaimed Items</span>
                         <div class="text-900 font-medium text-xl">
-                            ₱130.00
+                            {{ notPickedUpCount }}
                             <!-- {{ discount.total_discount ? '₱' + parseFloat(discount.total_discount).toFixed(2) : '₱0.00' }} -->
                         </div>
                     </div>
@@ -345,7 +369,7 @@ const toggleMenu = () => {
                     </div>
                 </div>
                 <span class="text-green-500 font-medium">
-                    ₱130.00 
+                    {{notPickedUpCount}}
                     <!-- {{ discount.today_discount ? '₱' + parseFloat(discount.today_discount).toFixed(2) : '₱0.00' }} -->
                 </span>
                 <span class="text-500">Total Unclaimed Items</span>
