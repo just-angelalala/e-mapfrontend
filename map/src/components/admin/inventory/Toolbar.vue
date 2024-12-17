@@ -279,8 +279,16 @@ const pdfViewerRef = ref(null);
         </template>
 
         <template v-slot:end>
+            <Button 
+            label="Print" 
+        icon="pi pi-print" 
+        class="p-button-success mr-2" 
+        @click="handlePrint" 
+    />
             <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Import" chooseLabel="Import"
                 class="mr-2 inline-block" />
+
+ 
                 <SplitButton 
                     :model="items" 
                     :loading="isLoading" 
@@ -288,7 +296,9 @@ const pdfViewerRef = ref(null);
                     icon="pi pi-upload" 
                     class="p-button-help"
                 />
+
         </template>
+
     </Toolbar>
 
     <DataTable ref="lowStockProducts" :value="lowStockProducts">
