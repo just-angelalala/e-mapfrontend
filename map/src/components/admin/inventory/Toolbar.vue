@@ -1,6 +1,6 @@
 <script setup>
 import { FilterMatchMode } from 'primevue/api';
-import { ref, onMounted, onBeforeMount, computed, watch } from 'vue';
+import { ref, onMounted, onBeforeMount, computed, watch, nextTick } from 'vue';
 import ProductService from '@/service/ProductService';
 import { useToast } from 'primevue/usetoast';
 import { useStore } from 'vuex';
@@ -96,6 +96,16 @@ const exportCSV = async (format) => {
     });
     try {
         // Assuming productService has a method that accepts format
+        if(format === 'pdf') {
+            const url = await productService.downloadReport(format);
+
+            isPreviewOpen.value = true;
+
+            await nextTick();
+        if (pdfViewerRef.value) {
+        pdfViewerRef.value.src = url;
+        }
+        }
         await productService.downloadReport(format);
     } catch (err) {
         console.error('Error downloading report:', err);
@@ -246,6 +256,9 @@ watch(lowStockProducts, (newVal, oldVal) => {
         });
     }
 });
+
+const isPreviewOpen = ref(false)
+const pdfViewerRef = ref(null);
 
 </script>
 
@@ -411,7 +424,19 @@ watch(lowStockProducts, (newVal, oldVal) => {
             <Button label="Yes" icon="pi pi-check" text @click="restoreSelectedProducts" />
         </template>
     </Dialog>
-
+    <Dialog
+    v-model:visible="isPreviewOpen"
+    modal
+    header="Print Preview"
+    :style="{ width: '50rem' }"
+    :breakpoints="{ '1199px': '75vw', '575px': '90vw' }"
+  >
+    <iframe
+      id="pdfViewer"
+      style="width: 100%; height: 500px; border: none;"
+      ref="pdfViewerRef"
+    ></iframe>
+  </Dialog>
 </template>
 
 <style scoped>
